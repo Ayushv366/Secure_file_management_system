@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileVault | Your Secure File Storage</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Modern icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        }
+        
+        .file-card {
+            transition: all 0.3s ease;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+        
+        .animate-gradient {
+            background: linear-gradient(90deg, #4f46e5, #8b5cf6, #4f46e5);
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-vault text-indigo-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">FileVault</span>
+                    </div>
+                </div>
+                
+                {% if username %}
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">Welcome, <strong>{{ username }}</strong></span>
+                    <a href="{{ url_for('logout') }}" class="px-4 py-2 rounded-full text-sm bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-2 rounded animate-fade-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm">{{ message }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if 'login' in request.path %}
+        <!-- Login Form -->
+        <div class="min-h-[80vh] flex items-center justify-center">
+            <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-xl glass-card">
+                <div class="text-center">
+                    <i class="fas fa-vault text-indigo-600 text-5xl mb-4"></i>
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Welcome back</h2>
+                    <p class="mt-2 text-sm text-gray-600">Sign in to access your files</p>
+                </div>
+                <form class="mt-8 space-y-6" action="{{ url_for('login') }}" method="POST">
+                    <div class="space-y-4 rounded-md">
+                        <div>
+                            <label for="username" class="sr-only">Username</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <input id="username" name="username" type="text" required class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-xl focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Username">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="password" class="sr-only">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input id="password" name="password" type="password" required class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-xl focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 animate-gradient">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </span>
+                            Sign in
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center">
+                    <p class="mt-2 text-sm text-gray-600">
+                        Don't have an account?
+                        <a href="{{ url_for('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                            Register here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% elif 'register' in request.path %}
+        <!-- Registration Form -->
+        <div class="min-h-[80vh] flex items-center justify-center">
+            <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-xl glass-card">
+                <div class="text-center">
+                    <i class="fas fa-user-plus text-indigo-600 text-5xl mb-4"></i>
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Create an account</h2>
+                    <p class="mt-2 text-sm text-gray-600">Start storing your files securely</p>
+                </div>
+                <form class="mt-8 space-y-6" action="{{ url_for('register') }}" method="POST">
+                    <div class="space-y-4 rounded-md">
+                        <div>
+                            <label for="username" class="sr-only">Username</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                <input id="username" name="username" type="text" required class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-xl focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Choose a username">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="password" class="sr-only">Password</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input id="password" name="password" type="password" required class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-xl focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Choose a secure password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 animate-gradient">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <i class="fas fa-user-plus"></i>
+                            </span>
+                            Register
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center">
+                    <p class="mt-2 text-sm text-gray-600">
+                        Already have an account?
+                        <a href="{{ url_for('login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                            Log in here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Dashboard -->
+        <div class="space-y-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">Your Files</h1>
+            </div>
+
+            <!-- File Upload and Search -->
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="md:w-1/2">
+                    <form action="{{ url_for('dashboard') }}" method="POST" enctype="multipart/form-data" class="p-6 bg-white rounded-xl shadow-md glass-card">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Upload New File</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-center w-full">
+                                <label for="file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 border-gray-300 hover:bg-gray-100">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                        <p class="text-xs text-gray-500">TXT, PDF, PNG, JPG, JPEG, GIF, ZIP (MAX 10MB)</p>
+                                    </div>
+                                    <input id="file" name="file" type="file" class="hidden" />
+                                </label>
+                            </div>
+                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-upload mr-2"></i> Upload File
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="md:w-1/2">
+                    <div class="p-6 bg-white rounded-xl shadow-md h-full glass-card">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Search & Sort</h2>
+                        <form action="{{ url_for('dashboard') }}" method="GET" class="space-y-4">
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search files..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Search
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort by:</label>
+                                <div class="flex gap-2">
+                                    <select name="sort" id="sort" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name</option>
+                                        <option value="size" {% if current_sort == 'size' %}selected{% endif %}>Size</option>
+                                    </select>
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <i class="fas fa-sort mr-2"></i> Sort
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File List -->
+            <div class="bg-white shadow-md rounded-xl overflow-hidden glass-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">Your Files ({{ files|length }})</h2>
+                </div>
+                
+                {% if files %}
+                <ul class="divide-y divide-gray-200">
+                    {% for file in files %}
+                    <li class="file-card hover:bg-gray-50 transition-all duration-200">
+                        <div class="px-6 py-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                    {% if file.name.endswith('.pdf') %}
+                                    <i class="fas fa-file-pdf"></i>
+                                    {% elif file.name.endswith('.txt') %}
+                                    <i class="fas fa-file-alt"></i>
+                                    {% elif file.name.endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                                    <i class="fas fa-file-image"></i>
+                                    {% elif file.name.endswith('.zip') %}
+                                    <i class="fas fa-file-archive"></i>
+                                    {% else %}
+                                    <i class="fas fa-file"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900 truncate" title="{{ file.name }}">{{ file.name }}</p>
+                                    <p class="text-xs text-gray-500">{{ (file.size / 1024)|round(1) }} KB</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('download_file', filename=file.name) }}" class="inline-flex items-center p-2 border border-transparent rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <form action="{{ url_for('delete_file', filename=file.name) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this file?');" class="inline">
+                                    <button type="submit" class="inline-flex items-center p-2 border border-transparent rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="p-6 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100">
+                        <i class="fas fa-folder-open text-gray-400"></i>
+                    </div>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No files</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        {% if search_query %}
+                        No files match your search "{{ search_query }}".
+                        {% else %}
+                        Get started by uploading a file.
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white shadow-inner mt-8 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-sm text-gray-500">
+                <p>© 2025 FileVault. All rights reserved.</p>
+                <p class="mt-2">Securely store and share your files with ease.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // File upload preview
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.querySelector('label[for="file"] p.mb-2');
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    fileLabel.innerHTML = `<span class="font-semibold">${this.files[0].name}</span>`;
+                } else {
+                    fileLabel.innerHTML = `<span class="font-semibold">Click to upload</span> or drag and drop`;
+                }
+            });
+        }
+        
+        // Drag and drop functionality
+        const dropArea = document.querySelector('label[for="file"]');
+        
+        if (dropArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('bg-indigo-50', 'border-indigo-300');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('bg-indigo-50', 'border-indigo-300');
+            }
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files && files.length > 0) {
+                    fileInput.files = files;
+                    fileLabel.innerHTML = `<span class="font-semibold">${files[0].name}</span>`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
